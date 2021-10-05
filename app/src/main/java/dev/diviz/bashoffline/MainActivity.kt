@@ -6,11 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.AnnotatedString
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -32,30 +29,37 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // runOnWorkerThread {
+
             val job = runJob {
-                val doc: Document = Jsoup.connect("https://bash.im").get()
-                Log.d("RTE", Thread.currentThread().name)
-                val list = mutableListOf<String>()
-                doc.getElementsByClass("quotes").first()?.getElementsByClass("quote")?.forEach {
-                    it.getElementsByClass("quote__body").first()?.html()?.let { html ->
-                        list.add(html)
-                    }
-                }
-                list
+                parsingBash()
             }.then({ Log.e("RTE", it.toString()) }) {
                 Log.d("RTE", Thread.currentThread().name)
                 for (itemQoute in it) {
-                    Log.d("Bash.im", itemQoute)
+                    Log.d("Bash.im", itemQoute.qoute)
                 }
-                list.value = it.map { data -> Qoute("123","123", data) }
-                list.value = it.map { data -> Qoute("123","123", data) }
+                list.value = it
+
             }
         }
 
 
-        // }
+    }
 
+    private fun parsingBash(): List<Qoute> {
+        val doc: Document = Jsoup.connect("https://bash.im").get()
+        Log.d("RTE", Thread.currentThread().name)
+        val result = mutableListOf<Qoute>()
+        doc.getElementsByClass("quotes").first()?.getElementsByClass("quote")?.forEach {
+
+            val date = it.getElementsByClass("quote__header_date").html()
+
+            val id = it.getElementsByClass("quote__header_permalink").html()
+
+            it.getElementsByClass("quote__body").first()?.html()?.let { html ->
+                result.add(Qoute(id, date, html))
+            }
+        }
+        return result
     }
 
 

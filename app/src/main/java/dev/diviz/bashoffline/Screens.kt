@@ -18,7 +18,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 
@@ -49,15 +52,13 @@ fun QouteView(
             .padding(6.dp)
             .fillMaxWidth()) {
             Row(modifier = Modifier
-                .padding(vertical = 6.dp)
                 .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = data.id, color = Color.Gray)
-                Text(text = data.date, color = Color.DarkGray)
+                Text(text = data.id, color = Color.Gray, fontSize = 12.sp)
+                Text(text = data.date, color = Color.Gray, fontSize = 12.sp)
 
             }
-
 
             Html(text = data.qoute)
         }

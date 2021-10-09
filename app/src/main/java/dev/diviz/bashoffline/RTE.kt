@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 
-class RTE<R>(val task: (jobContext: JobContext) -> R, val defaultTaskExecutor: ExecutorService = singleQueueExecutor("RTE", Thread.NORM_PRIORITY)) {
+class RTE<R>(val task: (jobContext: JobContext) -> R, private val defaultTaskExecutor: ExecutorService = singleQueueExecutor("RTE", Thread.NORM_PRIORITY)) {
 
     fun then(onError: (error: Throwable) -> Unit, onResult: (value: R) -> Unit): Job {
         val job = Job()

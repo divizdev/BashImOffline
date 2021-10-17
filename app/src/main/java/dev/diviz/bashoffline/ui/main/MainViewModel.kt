@@ -20,7 +20,6 @@ class MainViewModel : ViewModel() {
     init {
         job = runJob {
             Log.d("RTE", "start")
-            Thread.sleep(3_000)
             parsingBash()
         }.then({ Log.e("RTE", it.toString()) }) {
             Log.d("RTE", Thread.currentThread().name)

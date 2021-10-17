@@ -14,10 +14,13 @@ class MainViewModel : ViewModel() {
     private val _listQoute = MutableLiveData<List<Qoute>>()
     val listQoute: LiveData<List<Qoute>>
         get() = _listQoute
-    var job: Job
+
+    val job: Job
 
     init {
         job = runJob {
+            Log.d("RTE", "start")
+            Thread.sleep(3_000)
             parsingBash()
         }.then({ Log.e("RTE", it.toString()) }) {
             Log.d("RTE", Thread.currentThread().name)
@@ -25,19 +28,20 @@ class MainViewModel : ViewModel() {
                 Log.d("Bash.im", itemQoute.qoute)
             }
             _listQoute.value = it
-
         }
     }
 
     override fun onCleared() {
         super.onCleared()
         //todo: job clear
+        job.cancel()
     }
 
     private fun parsingBash(): List<Qoute> {
         val doc: Document = Jsoup.connect("https://bash.im").get()
         Log.d("RTE", Thread.currentThread().name)
         val result = mutableListOf<Qoute>()
+
         doc.getElementsByClass("quotes").first()?.getElementsByClass("quote")?.forEach {
 
             val date = it.getElementsByClass("quote__header_date").html()

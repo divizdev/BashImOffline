@@ -15,7 +15,7 @@ class MainViewModel : ViewModel() {
     val listQoute: LiveData<List<Qoute>>
         get() = _listQoute
 
-    val job: Job
+    private val job: Job
 
     init {
         job = runJob {

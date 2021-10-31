@@ -12,8 +12,8 @@ import java.util.concurrent.ThreadFactory
 
 class RTE<R>(
     private var task: ((jobContext: JobContext) -> R)?,
+    private val mainExecutor: Executor = mainThreadExecutor(),
     private val workerExecutor: ExecutorService = defaultWorkerExecutor,
-    private val mainExecutor: Executor = defaultMainExecutor,
 ) {
 
     companion object {
@@ -22,14 +22,6 @@ class RTE<R>(
 
         val defaultWorkerExecutor: ExecutorService = Executors.newFixedThreadPool(numberWorkers, getThreadFactory("RTE"))
 
-        val defaultMainExecutor: Executor = object : Executor {
-            private val handler = Handler(Looper.getMainLooper())
-
-            override fun execute(command: Runnable?) {
-                if (command == null) return
-                handler.post(command)
-            }
-        }
 
         private fun getThreadFactory(name: String, priority: Int = Thread.NORM_PRIORITY): ThreadFactory {
             return ThreadFactory { r ->
@@ -47,8 +39,6 @@ class RTE<R>(
             try {
                 val result = task!!(job.context)
                 task = null //TODO: Захват контектса
-
-                Log.d("RTE", "${!job.context.isCancel} && ${!Thread.currentThread().isInterrupted} && ${job.future?.isCancelled}")
 
                 if (!job.context.isCancel && !Thread.currentThread().isInterrupted) {
                     mainExecutor.execute {
@@ -83,7 +73,7 @@ class JobContext {
 
 }
 
-private class InternalJob(public override val context: JobContext = JobContext()): Job(context) {
+private class InternalJob(public override val context: JobContext = JobContext()) : Job(context) {
     @Volatile
     public override var future: Future<*>? = null
 
@@ -101,5 +91,14 @@ open class Job(protected open val context: JobContext = JobContext()) {
     }
 }
 
-fun <T> runJob(task: (jobContext: JobContext) -> T): RTE<T> = RTE(task)
+fun <T> runJob(mainExecutor: Executor = mainThreadExecutor(), task: (jobContext: JobContext) -> T): RTE<T> = RTE(task, mainExecutor)
+
+fun mainThreadExecutor(): Executor = object : Executor {
+    private val handler = Handler(Looper.getMainLooper())
+
+    override fun execute(command: Runnable?) {
+        if (command == null) return
+        handler.post(command)
+    }
+}
 
